@@ -26,7 +26,7 @@ function Elevators(props) {
 				<p className={classes.rowNumber}>{getFloorText(rowIndex)}</p>
 				{elevators.map((elevator, columnIndex) => (
 					<div key={columnIndex} className={classes.cell}>
-						{elevator.floor === rowIndex && (
+						{0 === rowIndex && (
 							<Elevator
 								updateElevatorFloor={() => updateElevatorFloor(1, rowIndex)}
 								elevatorState={elevators[columnIndex]}
