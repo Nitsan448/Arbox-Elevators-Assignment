@@ -1,0 +1,27 @@
+.button {
+	width: 6em;
+	height: 2em;
+	border-radius: var(--BORDER-RADIUS);
+	/* box-shadow: ; */
+}
+
+.call {
+	color: var(--WHITE);
+	background-color: var(--GREEN);
+}
+
+.waiting {
+	color: var(--WHITE);
+	background-color: var(--RED);
+}
+
+.arrived {
+	color: var(--GREEN);
+	background-color: var(--WHITE);
+	border: 4px var(--GREEN) solid;
+}
+
+.button:hover,
+.button:active {
+	transform: scale(1.1);
+}

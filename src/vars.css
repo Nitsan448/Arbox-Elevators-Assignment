@@ -7,6 +7,8 @@
 	--GRAY: rgb(238, 238, 238);
 	--BLACK: rgb(65, 65, 65);
 	--WHITE: rgb(255, 255, 255);
+	--GREEN: rgb(91, 205, 136);
+	--RED: rgb(237, 72, 77);
 
 	/* BORDERS */
 	--BORDER: 4px var(--GRAY) solid;

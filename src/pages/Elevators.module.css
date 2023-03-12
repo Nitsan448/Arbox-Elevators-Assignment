@@ -1,0 +1,30 @@
+.elevatorExercise {
+	margin: 1em 0 1em 0;
+	text-align: center;
+}
+
+.grid {
+	display: grid;
+	grid-gap: 10px;
+	background-color: var(--GRAY);
+	border-radius: 5px;
+	border: 4px var(--GRAY) solid;
+	grid-gap: 2px;
+	width: 60%;
+	height: 80vh;
+	margin: auto;
+}
+
+.rowNumber {
+	text-align: right;
+	font-weight: bold;
+	margin: auto 1em auto 0em;
+}
+
+.cell {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: white;
+	color: var(--BLACK);
+}
