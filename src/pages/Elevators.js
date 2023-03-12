@@ -1,21 +1,21 @@
 import React from "react";
 import classes from "./Elevators.module.css";
 import { useSelector } from "react-redux";
-import Button from "../components/UI/Button";
+import ElevatorButton from "../components/UI/ElevatorButton";
 
 function Elevators(props) {
 	const settings = useSelector((state) => state.settings);
-	const gridTemplateRows = `repeat(${settings.floors}, 1fr)`;
-	const gridTemplateColumns = `repeat(${settings.elevators + 2}, 1fr)`;
+	const gridTemplateRows = `repeat(${+settings.floors}, 1fr)`;
+	const gridTemplateColumns = `repeat(${+settings.elevators + 2}, 1fr)`;
 
 	function getGridRow(rowIndex) {
 		return (
 			<React.Fragment key={rowIndex}>
-				<p className={classes.rowNumber}>{getFloorText(rowIndex)}</p>
+				<p className={classes.rowNumber}>{getFloorText(settings.floors - rowIndex - 1)}</p>
 				{Array.from({ length: settings.elevators }).map((_, columnIndex) => (
 					<div key={columnIndex} className={classes.cell}></div>
 				))}
-				<Button text="call" />
+				<ElevatorButton text="call" />
 			</React.Fragment>
 		);
 	}

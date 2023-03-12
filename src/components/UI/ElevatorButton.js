@@ -1,7 +1,7 @@
 import React from "react";
-import classes from "./Button.module.css";
+import classes from "./ElevatorButton.module.css";
 
-function Button(props) {
+function ElevatorButton(props) {
 	let buttonClasses;
 
 	switch (props.text) {
@@ -22,4 +22,4 @@ function Button(props) {
 	);
 }
 
-export default Button;
+export default ElevatorButton;

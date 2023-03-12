@@ -2,6 +2,8 @@
 	width: 6em;
 	height: 2em;
 	border-radius: var(--BORDER-RADIUS);
+	margin: auto 0 auto 1em;
+	border: none;
 	/* box-shadow: ; */
 }
 
