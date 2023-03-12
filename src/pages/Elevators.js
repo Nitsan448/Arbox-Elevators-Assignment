@@ -1,27 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
 import classes from "./Elevators.module.css";
 import { useSelector } from "react-redux";
 import ElevatorButton from "../components/UI/ElevatorButton";
+import { getNumberSuffix } from "../helpers/helpers";
+import Elevator from "../components/Elevators/Elevator";
 
 function Elevators(props) {
 	const settings = useSelector((state) => state.settings);
 	const gridTemplateRows = `repeat(${+settings.floors}, 1fr)`;
 	const gridTemplateColumns = `repeat(${+settings.elevators + 2}, 1fr)`;
 
+	const [elevators, setElevators] = useState(
+		Array.from({ length: settings.elevators }).map((_, index) => ({ floor: 0, destination: 0 }))
+	);
+
+	function updateElevatorFloor(elevatorIndex, newFloor) {
+		let newElevators = [...elevators];
+		newElevators[elevatorIndex].floor = newFloor;
+		setElevators(newElevators);
+	}
+
 	function getGridRow(rowIndex) {
 		return (
 			<React.Fragment key={rowIndex}>
-				<p className={classes.rowNumber}>{getFloorText(settings.floors - rowIndex - 1)}</p>
-				{Array.from({ length: settings.elevators }).map((_, columnIndex) => (
-					<div key={columnIndex} className={classes.cell}></div>
+				<p className={classes.rowNumber}>{getFloorText(rowIndex)}</p>
+				{elevators.map((elevator, columnIndex) => (
+					<div key={columnIndex} className={classes.cell}>
+						{elevator.floor === rowIndex && (
+							<Elevator
+								updateElevatorFloor={() => updateElevatorFloor(1, rowIndex)}
+								elevatorState={elevators[columnIndex]}
+							/>
+						)}
+					</div>
 				))}
-				<ElevatorButton text="call" />
+				<ElevatorButton onClick={() => updateElevatorFloor(1, rowIndex)} text="call" />
 			</React.Fragment>
 		);
 	}
 
 	function getFloorText(floor) {
-		const floorText = floor === 0 ? "Ground Floor" : floor === 1 ? "1st" : floor === 2 ? "2nd" : `${floor}rd`;
+		const floorText = floor === 0 ? "Ground Floor" : `${floor}${getNumberSuffix(floor)}`;
 		return floorText;
 	}
 
@@ -29,7 +48,9 @@ function Elevators(props) {
 		<>
 			<h1 className={classes.elevatorExercise}>Elevator Exercise</h1>
 			<div className={classes.grid} style={{ gridTemplateColumns, gridTemplateRows }}>
-				{Array.from({ length: settings.floors }).map((_, rowIndex) => getGridRow(rowIndex))}
+				{Array.from({ length: settings.floors }).map((_, rowIndex) =>
+					getGridRow(settings.floors - rowIndex - 1)
+				)}
 			</div>
 		</>
 	);
