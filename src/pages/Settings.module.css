@@ -1,0 +1,26 @@
+.settingsForm {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateY(-50%) translateX(-50%);
+	text-align: center;
+	background-color: var(--WHITE);
+	padding: 5em;
+}
+
+.settingsForm label {
+	font-size: 1.3em;
+	margin-bottom: 0.2em;
+	display: block;
+}
+
+.settingsForm input {
+	text-align: center;
+	margin: 0 auto 0.7em auto;
+	display: block;
+}
+
+.settingsForm button {
+	margin-top: 0.5em;
+	padding: 0.5em;
+}
