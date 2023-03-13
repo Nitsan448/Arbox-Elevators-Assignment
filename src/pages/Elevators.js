@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import classes from "./Elevators.module.css";
 import { useSelector } from "react-redux";
 import ElevatorButton from "../components/UI/ElevatorButton";
@@ -14,9 +14,18 @@ function Elevators(props) {
 		Array.from({ length: settings.elevators }).map((_, index) => ({ floor: 0, destination: 0 }))
 	);
 
-	function updateElevatorFloor(elevatorIndex, newFloor) {
+	const updateElevatorFloor = useCallback(
+		(elevatorIndex, newFloor) => {
+			let newElevators = [...elevators];
+			newElevators[elevatorIndex].floor = newFloor;
+			setElevators(newElevators);
+		},
+		[elevators]
+	);
+
+	function updateElevatorDestination(elevatorIndex, destination) {
 		let newElevators = [...elevators];
-		newElevators[elevatorIndex].floor = newFloor;
+		newElevators[elevatorIndex].destination = destination;
 		setElevators(newElevators);
 	}
 
@@ -28,13 +37,14 @@ function Elevators(props) {
 					<div key={columnIndex} className={classes.cell}>
 						{0 === rowIndex && (
 							<Elevator
-								updateElevatorFloor={() => updateElevatorFloor(1, rowIndex)}
-								elevatorState={elevators[columnIndex]}
+								updateElevatorFloor={updateElevatorFloor}
+								elevatorState={elevator}
+								index={columnIndex}
 							/>
 						)}
 					</div>
 				))}
-				<ElevatorButton onClick={() => updateElevatorFloor(1, rowIndex)} text="call" />
+				<ElevatorButton onClick={() => updateElevatorDestination(1, rowIndex)} text="call" />
 			</React.Fragment>
 		);
 	}
