@@ -31,23 +31,29 @@ function Elevators(props) {
 		Array.from({ length: settings.elevators }).map((_, index) => ({
 			index,
 			floor: 0,
-			destination: 0,
+			destination: -1,
 			waiting: false,
 		}))
 	);
 
 	function isElevatorOccupied(elevatorIndex) {
 		return (
-			elevators[elevatorIndex].floor !== elevators[elevatorIndex].destination || elevators[elevatorIndex].waiting
+			(elevators[elevatorIndex].floor !== elevators[elevatorIndex].destination &&
+				elevators[elevatorIndex].destination !== -1) ||
+			elevators[elevatorIndex].waiting
 		);
 	}
 
-	function getUnoccupied() {
-		for (let i = 0; i < elevators.length; i++) {
-			if (!isElevatorOccupied(i)) {
-				return i;
+	function getClosestUnoccupiedElevator(destination) {
+		//Take the filter out of the function for optimization
+		const unoccupiedElevators = elevators.filter((_, elevatorIndex) => !isElevatorOccupied(elevatorIndex));
+		let closestElevator = unoccupiedElevators[0];
+		for (let i = 1; i < unoccupiedElevators.length; i++) {
+			if (Math.abs(closestElevator.floor - destination) > Math.abs(unoccupiedElevators[i].floor - destination)) {
+				closestElevator = unoccupiedElevators[i];
 			}
 		}
+		return closestElevator;
 	}
 
 	function getElevatorButtonText(rowIndex) {
@@ -61,7 +67,7 @@ function Elevators(props) {
 	}
 
 	function getGridRow(rowIndex) {
-		const elevatorIndex = getUnoccupied();
+		const elevator = getClosestUnoccupiedElevator(rowIndex);
 		return (
 			<React.Fragment key={rowIndex}>
 				<p className={classes.rowNumber}>{getFloorText(rowIndex)}</p>
@@ -75,10 +81,10 @@ function Elevators(props) {
 						dispatch({
 							type: "update",
 							payload: {
-								index: elevatorIndex,
-								floor: elevators[elevatorIndex].floor,
+								index: elevator.index,
+								floor: elevator.floor,
 								destination: rowIndex,
-								waiting: elevators[elevatorIndex].waiting,
+								waiting: elevator.waiting,
 							},
 						})
 					}

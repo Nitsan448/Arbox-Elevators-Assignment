@@ -6,27 +6,39 @@ function Elevator(props) {
 	const { index, floor, destination, waiting } = props.elevatorState;
 	const updateElevatorState = useRef(props.updateElevatorState);
 
-	const translationPercent = destination * -200;
+	let newFloor = floor;
+	if (destination > floor) {
+		newFloor++;
+	} else if (destination < floor && destination !== -1) {
+		newFloor--;
+	}
+
+	const translationPercent = newFloor * -200;
 	//To account for the grid border gap
-	const translationPixels = destination * -2;
+	const translationPixels = newFloor * -2;
 
 	const timeToSwitchFloorInSeconds = 1;
-	const timeToReachDestinationFromOrigin = Math.abs(destination - floor) * timeToSwitchFloorInSeconds * 1000;
+	const timeToReachDestinationFromOrigin = timeToSwitchFloorInSeconds * 1000;
 	const waitingTime = 2000;
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			if (destination !== floor) {
+			if (destination !== newFloor) {
 				updateElevatorState.current({
 					type: "update",
-					payload: { index: index, floor: destination, destination, waiting: true },
+					payload: { index: index, floor: newFloor, destination, waiting: false },
+				});
+			} else {
+				updateElevatorState.current({
+					type: "update",
+					payload: { index: index, floor: newFloor, destination, waiting: destination !== -1 },
 				});
 			}
 		}, timeToReachDestinationFromOrigin);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [floor, destination, timeToReachDestinationFromOrigin, updateElevatorState, index]);
+	}, [destination, timeToReachDestinationFromOrigin, updateElevatorState, index, newFloor]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
