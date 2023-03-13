@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState, useReducer } from "react";
 import classes from "./Elevators.module.css";
 import { useSelector } from "react-redux";
 import ElevatorButton from "../components/UI/ElevatorButton";
@@ -10,41 +10,80 @@ function Elevators(props) {
 	const gridTemplateRows = `repeat(${+settings.floors}, 1fr)`;
 	const gridTemplateColumns = `repeat(${+settings.elevators + 2}, 1fr)`;
 
-	const [elevators, setElevators] = useState(
-		Array.from({ length: settings.elevators }).map((_, index) => ({ floor: 0, destination: 0 }))
-	);
-
-	const updateElevatorFloor = useCallback(
-		(elevatorIndex, newFloor) => {
-			let newElevators = [...elevators];
-			newElevators[elevatorIndex].floor = newFloor;
-			setElevators(newElevators);
+	const [elevators, dispatch] = useReducer(
+		(state, action) => {
+			switch (action.type) {
+				case "update":
+					return state.map((elevator, index) =>
+						elevator.index === action.payload.index
+							? {
+									...elevator,
+									floor: action.payload.floor,
+									destination: action.payload.destination,
+									waiting: action.payload.waiting,
+							  }
+							: elevator
+					);
+				default:
+					return state;
+			}
 		},
-		[elevators]
+		Array.from({ length: settings.elevators }).map((_, index) => ({
+			index,
+			floor: 0,
+			destination: 0,
+			waiting: false,
+		}))
 	);
 
-	function updateElevatorDestination(elevatorIndex, destination) {
-		let newElevators = [...elevators];
-		newElevators[elevatorIndex].destination = destination;
-		setElevators(newElevators);
+	function isElevatorOccupied(elevatorIndex) {
+		return (
+			elevators[elevatorIndex].floor !== elevators[elevatorIndex].destination || elevators[elevatorIndex].waiting
+		);
+	}
+
+	function getUnoccupied() {
+		for (let i = 0; i < elevators.length; i++) {
+			if (!isElevatorOccupied(i)) {
+				return i;
+			}
+		}
+	}
+
+	function getElevatorButtonText(rowIndex) {
+		let text = "call";
+		for (let i = 0; i < elevators.length; i++) {
+			if (elevators[i].floor === rowIndex && elevators[i].waiting) {
+				text = "waiting";
+			}
+		}
+		return text;
 	}
 
 	function getGridRow(rowIndex) {
+		const elevatorIndex = getUnoccupied();
 		return (
 			<React.Fragment key={rowIndex}>
 				<p className={classes.rowNumber}>{getFloorText(rowIndex)}</p>
 				{elevators.map((elevator, columnIndex) => (
 					<div key={columnIndex} className={classes.cell}>
-						{0 === rowIndex && (
-							<Elevator
-								updateElevatorFloor={updateElevatorFloor}
-								elevatorState={elevator}
-								index={columnIndex}
-							/>
-						)}
+						{0 === rowIndex && <Elevator updateElevatorState={dispatch} elevatorState={elevator} />}
 					</div>
 				))}
-				<ElevatorButton onClick={() => updateElevatorDestination(1, rowIndex)} text="call" />
+				<ElevatorButton
+					onClick={() =>
+						dispatch({
+							type: "update",
+							payload: {
+								index: elevatorIndex,
+								floor: elevators[elevatorIndex].floor,
+								destination: rowIndex,
+								waiting: elevators[elevatorIndex].waiting,
+							},
+						})
+					}
+					text={getElevatorButtonText(rowIndex)}
+				/>
 			</React.Fragment>
 		);
 	}

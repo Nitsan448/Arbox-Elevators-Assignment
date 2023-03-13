@@ -1,32 +1,52 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import classes from "./Elevator.module.css";
 import elevatorImage from "../../images/icons8-elevator.svg";
 
 function Elevator(props) {
-	const { floor, destination } = props.elevatorState;
-	const updateElevatorFloor = useRef(props.updateElevatorFloor);
+	const { index, floor, destination, waiting } = props.elevatorState;
+	const updateElevatorState = useRef(props.updateElevatorState);
 
 	const translationPercent = destination * -200;
 	//To account for the grid border gap
 	const translationPixels = destination * -2;
 
 	const timeToSwitchFloorInSeconds = 1;
-	const timeToReachDestinationFromOrigin = Math.abs(destination - floor) * timeToSwitchFloorInSeconds;
+	const timeToReachDestinationFromOrigin = Math.abs(destination - floor) * timeToSwitchFloorInSeconds * 1000;
+	const waitingTime = 2000;
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			updateElevatorFloor.current(props.index, destination);
-		}, timeToReachDestinationFromOrigin * 1000);
+			if (destination !== floor) {
+				updateElevatorState.current({
+					type: "update",
+					payload: { index: index, floor: destination, destination, waiting: true },
+				});
+			}
+		}, timeToReachDestinationFromOrigin);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [destination, timeToReachDestinationFromOrigin, updateElevatorFloor]);
+	}, [floor, destination, timeToReachDestinationFromOrigin, updateElevatorState, index]);
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (waiting) {
+				updateElevatorState.current({
+					type: "update",
+					payload: { index, floor, destination, waiting: false },
+				});
+			}
+		}, waitingTime);
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [waitingTime, updateElevatorState, index, floor, destination, waiting]);
 
 	return (
 		<img
 			style={{
 				transform: `translateY(calc(${translationPercent}% + ${translationPixels}px))`,
-				transitionDuration: `${timeToReachDestinationFromOrigin}s`,
+				transitionDuration: `${timeToReachDestinationFromOrigin}ms`,
 			}}
 			className={classes.elevator}
 			src={elevatorImage}
