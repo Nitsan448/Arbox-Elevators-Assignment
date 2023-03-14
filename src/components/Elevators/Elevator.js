@@ -3,13 +3,14 @@ import classes from "./Elevator.module.css";
 import elevatorImage from "../../images/icons8-elevator.svg";
 
 function Elevator(props) {
-	const { index, floor, destination, waiting } = props.elevatorState;
+	const { index, floor, destination, isWaiting } = props.elevatorState;
 	const updateElevatorState = useRef(props.updateElevatorState);
+	const hasMoved = destination !== -1;
 
 	let newFloor = floor;
 	if (destination > floor) {
 		newFloor++;
-	} else if (destination < floor && destination !== -1) {
+	} else if (destination < floor && hasMoved) {
 		newFloor--;
 	}
 
@@ -17,48 +18,39 @@ function Elevator(props) {
 	//To account for the grid border gap
 	const translationPixels = newFloor * -2;
 
-	const timeToSwitchFloorInSeconds = 1;
-	const timeToReachDestinationFromOrigin = timeToSwitchFloorInSeconds * 1000;
+	const timeToSwitchFloor = 1000;
 	const waitingTime = 2000;
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			if (destination !== newFloor) {
-				updateElevatorState.current({
-					type: "update",
-					payload: { index: index, floor: newFloor, destination, waiting: false },
-				});
-			} else {
-				updateElevatorState.current({
-					type: "update",
-					payload: { index: index, floor: newFloor, destination, waiting: destination !== -1 },
-				});
-			}
-		}, timeToReachDestinationFromOrigin);
+			const reachedDestination = destination === newFloor && hasMoved;
+			updateElevatorState.current({
+				payload: { index: index, floor: newFloor, destination, isWaiting: reachedDestination },
+			});
+		}, timeToSwitchFloor);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [destination, timeToReachDestinationFromOrigin, updateElevatorState, index, newFloor]);
+	}, [destination, timeToSwitchFloor, updateElevatorState, index, newFloor, hasMoved]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			if (waiting) {
+			if (isWaiting) {
 				updateElevatorState.current({
-					type: "update",
-					payload: { index, floor, destination, waiting: false },
+					payload: { index, floor, destination, isWaiting: false },
 				});
 			}
 		}, waitingTime);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [waitingTime, updateElevatorState, index, floor, destination, waiting]);
+	}, [waitingTime, updateElevatorState, index, floor, destination, isWaiting]);
 
 	return (
 		<img
 			style={{
 				transform: `translateY(calc(${translationPercent}% + ${translationPixels}px))`,
-				transitionDuration: `${timeToReachDestinationFromOrigin}ms`,
+				transitionDuration: `${timeToSwitchFloor}ms`,
 			}}
 			className={classes.elevator}
 			src={elevatorImage}
