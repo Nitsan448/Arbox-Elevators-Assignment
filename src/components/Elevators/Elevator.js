@@ -16,7 +16,7 @@ function Elevator(props) {
 		newFloor--;
 	}
 
-	const reachedDestination = destination === newFloor && hasMoved && queue.length > 0;
+	const hasArrived = destination === newFloor && hasMoved;
 
 	const translationPercent = newFloor * -200;
 	//To account for the grid border gap
@@ -28,30 +28,42 @@ function Elevator(props) {
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			updateElevatorState.current({
-				payload: { index: index, floor: newFloor, isWaiting: reachedDestination, queue: queue },
+				payload: {
+					index: index,
+					floor: newFloor,
+					isWaiting: hasArrived && queue.length > 0,
+					hasArrived: hasArrived,
+					queue: queue,
+				},
 			});
 		}, timeToSwitchFloor);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [reachedDestination, updateElevatorState, index, newFloor, hasMoved, queue]);
+	}, [hasArrived, updateElevatorState, index, newFloor, hasMoved, queue]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			if (isWaiting) {
 				const newQueue = [...queue];
-				if (reachedDestination) {
+				if (hasArrived && queue.length > 0) {
 					newQueue.shift();
 				}
 				updateElevatorState.current({
-					payload: { index: index, floor: floor, isWaiting: false, queue: newQueue },
+					payload: {
+						index: index,
+						floor: floor,
+						isWaiting: false,
+						hasArrived: hasArrived,
+						queue: newQueue,
+					},
 				});
 			}
 		}, waitingTime);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [reachedDestination, waitingTime, updateElevatorState, index, floor, isWaiting, queue]);
+	}, [hasArrived, waitingTime, updateElevatorState, index, floor, isWaiting, queue]);
 
 	return (
 		<img

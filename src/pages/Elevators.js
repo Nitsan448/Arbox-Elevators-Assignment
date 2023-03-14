@@ -12,6 +12,7 @@ function elevatorStateReducer(state, action) {
 					index: action.payload.index,
 					floor: action.payload.floor,
 					isWaiting: action.payload.isWaiting,
+					hasArrived: action.payload.hasArrived,
 					queue: action.payload.queue,
 			  }
 			: elevator
@@ -29,10 +30,11 @@ function Elevators(props) {
 			index,
 			floor: 0,
 			isWaiting: false,
+			hasArrived: true,
 			queue: [
+				{ destination: 2, timeToArrive: 12 },
 				{ destination: 4, timeToArrive: 12 },
-				{ destination: 6, timeToArrive: 12 },
-				{ destination: 0, timeToArrive: 12 },
+				{ destination: 3, timeToArrive: 12 },
 			],
 		}))
 	);
@@ -57,21 +59,6 @@ function Elevators(props) {
 		return elevatorIsMoving || elevator.isWaiting;
 	}
 
-	function getFloorText(floor) {
-		const floorText = floor === 0 ? "Ground Floor" : `${floor}${getNumberSuffix(floor)}`;
-		return floorText;
-	}
-
-	function getElevatorButtonText(rowIndex) {
-		let text = "call";
-		for (let i = 0; i < elevators.length; i++) {
-			if (elevators[i].floor === rowIndex && elevators[i].isWaiting) {
-				text = "waiting";
-			}
-		}
-		return text;
-	}
-
 	function getGridRow(rowIndex) {
 		const elevator = getClosestUnoccupiedElevator(rowIndex);
 		return (
@@ -84,21 +71,43 @@ function Elevators(props) {
 						)}
 					</div>
 				))}
-				<ElevatorButton
-					onClick={() =>
-						dispatchUpdateElevators({
-							payload: {
-								index: elevator.index,
-								floor: elevator.floor,
-								destination: rowIndex,
-								isWaiting: elevator.isWaiting,
-							},
-						})
-					}
-					text={getElevatorButtonText(rowIndex)}
-				/>
+				{getElevatorButton(elevator, rowIndex)}
 			</React.Fragment>
 		);
+	}
+
+	function getFloorText(floor) {
+		const floorText = floor === 0 ? "Ground Floor" : `${floor}${getNumberSuffix(floor)}`;
+		return floorText;
+	}
+
+	function getElevatorButton(elevator, rowIndex) {
+		return (
+			<ElevatorButton
+				onClick={() =>
+					dispatchUpdateElevators({
+						payload: {
+							index: elevator.index,
+							floor: elevator.floor,
+							isWaiting: elevator.isWaiting,
+						},
+					})
+				}
+				text={getElevatorButtonText(rowIndex)}
+			/>
+		);
+	}
+
+	function getElevatorButtonText(rowIndex) {
+		for (let i = 0; i < elevators.length; i++) {
+			const elevatorInFloor = elevators[i].floor === rowIndex;
+			if (elevatorInFloor && elevators[i].isWaiting) {
+				return "waiting";
+			} else if (elevatorInFloor && elevators[i].hasArrived && elevators[i].queue.length === 0) {
+				return "arrived";
+			}
+		}
+		return "call";
 	}
 
 	return (
