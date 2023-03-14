@@ -11,9 +11,6 @@
 	color: var(--WHITE);
 	background-color: var(--GREEN);
 }
-.call:disabled {
-	background-color: rgb(184, 184, 184);
-}
 
 .waiting {
 	color: var(--WHITE);
