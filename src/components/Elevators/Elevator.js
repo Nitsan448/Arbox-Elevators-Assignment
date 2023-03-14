@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 function Elevator(props) {
 	const settings = useSelector((state) => state.settings);
-	const { index, floor, isWaiting, queue } = props.elevatorState;
+	const { index, floor, hasArrived, queue } = props.elevatorState;
 	const updateElevatorState = useRef(props.updateElevatorState);
 
 	const destination = queue.length > 0 ? queue[0].destination : floor;
@@ -22,7 +22,7 @@ function Elevator(props) {
 		newFloor--;
 	}
 
-	const hasArrived = destination === newFloor && hasMoved.current;
+	const arrivedInDestination = destination === newFloor && hasMoved.current && queue.length > 0;
 
 	const translationPercent = newFloor * -200;
 	//To account for the grid border gap
@@ -35,8 +35,7 @@ function Elevator(props) {
 				payload: {
 					index: index,
 					floor: newFloor,
-					isWaiting: hasArrived && queue.length > 0,
-					hasArrived: hasArrived,
+					hasArrived: arrivedInDestination,
 					queue: queue,
 				},
 			});
@@ -44,13 +43,13 @@ function Elevator(props) {
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [hasArrived, index, newFloor, queue, settings.timeToSwitchFloor]);
+	}, [arrivedInDestination, index, newFloor, queue, settings.timeToSwitchFloor]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			if (isWaiting) {
+			if (hasArrived) {
 				const newQueue = [...queue];
-				if (hasArrived && queue.length > 0) {
+				if (arrivedInDestination) {
 					newQueue.shift();
 				}
 				updateElevatorState.current({
@@ -58,8 +57,7 @@ function Elevator(props) {
 					payload: {
 						index: index,
 						floor: floor,
-						isWaiting: false,
-						hasArrived: hasArrived,
+						hasArrived: false,
 						queue: newQueue,
 					},
 				});
@@ -68,7 +66,7 @@ function Elevator(props) {
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [hasArrived, index, floor, isWaiting, queue, settings.waitingTime]);
+	}, [arrivedInDestination, hasArrived, index, floor, queue, settings.waitingTime]);
 
 	return (
 		<img

@@ -13,7 +13,6 @@ function elevatorStateReducer(state, action) {
 					? {
 							index: action.payload.index,
 							floor: action.payload.floor,
-							isWaiting: action.payload.isWaiting,
 							hasArrived: action.payload.hasArrived,
 							queue: action.payload.queue,
 					  }
@@ -42,7 +41,6 @@ function Elevators(props) {
 		Array.from({ length: settings.elevators }).map((_, index) => ({
 			index,
 			floor: 0,
-			isWaiting: false,
 			hasArrived: false,
 			queue: [],
 		}))
@@ -107,32 +105,37 @@ function Elevators(props) {
 
 	function getElevatorButton(rowIndex) {
 		const closestElevator = getClosestElevator(rowIndex);
+		const buttonState = getElevatorButtonState(rowIndex);
 		return (
 			<ElevatorButton
 				onClick={() =>
 					dispatchUpdateElevators({
 						type: "ADD_ITEM_TO_QUEUE",
 						payload: {
-							index: closestElevator.elevator,
+							index: closestElevator.elevator.index,
 							newItem: { destination: rowIndex, timeUntilArrival: closestElevator.timeUntilArrival },
 						},
 					})
 				}
-				text={getElevatorButtonText(rowIndex)}
+				disabled={buttonState.disabled}
+				text={buttonState.text}
 			/>
 		);
 	}
 
-	function getElevatorButtonText(rowIndex) {
+	function getElevatorButtonState(rowIndex) {
+		const elevatorButtonState = { text: "call", disabled: false };
 		for (let i = 0; i < elevators.length; i++) {
 			const elevatorInFloor = elevators[i].floor === rowIndex;
-			if (elevatorInFloor && elevators[i].isWaiting) {
-				return "waiting";
-			} else if (elevatorInFloor && elevators[i].hasArrived && elevators[i].queue.length === 0) {
-				return "arrived";
+			const destinationInQueue = elevators[i].queue.some((item) => item.destination === rowIndex);
+
+			if (elevatorInFloor && elevators[i].hasArrived) {
+				return { text: "arrived", disabled: true };
+			} else if (destinationInQueue) {
+				return { text: "waiting", disabled: true };
 			}
 		}
-		return "call";
+		return elevatorButtonState;
 	}
 
 	return (
