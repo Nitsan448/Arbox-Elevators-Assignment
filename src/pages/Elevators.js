@@ -36,8 +36,6 @@ function elevatorStateReducer(state, action) {
 
 function Elevators(props) {
 	const settings = useSelector((state) => state.settings);
-	const gridTemplateRows = `repeat(${+settings.floors}, 1fr)`;
-	const gridTemplateColumns = `repeat(${+settings.elevators + 2}, 1fr)`;
 
 	const [elevators, dispatchUpdateElevators] = useReducer(
 		elevatorStateReducer,
@@ -50,44 +48,38 @@ function Elevators(props) {
 		}))
 	);
 
-	// TODO: change function name
-	function getFirstElevatorToArrive(destination) {
-		let firstElevatorToArrive = { elevatorIndex: 0, timeUntilArrival: 1000 };
+	function getClosestElevator(destination) {
+		let closestElevator = { elevatorIndex: elevators[0], timeUntilArrival: 1000 };
 
-		//TODO: Calculate the time until the elevator arrives, return the one that will arrive first and it's time,
-		for (let elevatorIndex = 0; elevatorIndex < elevators.length; elevatorIndex++) {
-			const timeUntilArrival = getTimeUntilArrival(elevatorIndex, destination);
-			if (timeUntilArrival < firstElevatorToArrive.timeUntilArrival) {
-				firstElevatorToArrive = { elevatorIndex, timeUntilArrival };
+		elevators.forEach((elevator) => {
+			const timeUntilArrival = getTimeUntilArrival(elevator, destination);
+			if (timeUntilArrival < closestElevator.timeUntilArrival) {
+				closestElevator = { elevator, timeUntilArrival };
 			}
-		}
+		});
 
-		return firstElevatorToArrive;
+		return closestElevator;
 	}
 
-	function getTimeUntilArrival(elevatorIndex, destination) {
-		const elevator = elevators[elevatorIndex];
-		const timeToSwitchFloor = 1;
-		const waitingTime = 2;
-
+	function getTimeUntilArrival(elevator, destination) {
 		if (elevator.queue.length === 0) {
-			let distanceToNextItem = Math.abs(elevator.floor - destination);
-			let timeUntilArrival = distanceToNextItem * timeToSwitchFloor + waitingTime;
+			const distanceToDestination = Math.abs(elevator.floor - destination);
+			const timeUntilArrival = distanceToDestination * settings.timeToSwitchFloor + settings.waitingTime;
 			return timeUntilArrival;
 		}
 
 		let distanceToNextItem = Math.abs(elevator.floor - elevator.queue[0].destination);
-		let timeUntilArrival = distanceToNextItem * timeToSwitchFloor + waitingTime;
+		let timeUntilArrival = distanceToNextItem * settings.timeToSwitchFloor + settings.waitingTime;
 
 		for (let index = 1; index < elevator.queue.length; index++) {
 			distanceToNextItem = Math.abs(elevator.queue[index - 1].destination - elevator.queue[index].destination);
 
-			const timeUntilArrivalToItem = distanceToNextItem * timeToSwitchFloor;
-			timeUntilArrival += timeUntilArrivalToItem + waitingTime;
+			const timeUntilArrivalToNextItem = distanceToNextItem * settings.timeToSwitchFloor;
+			timeUntilArrival += timeUntilArrivalToNextItem + settings.waitingTime;
 		}
 
 		distanceToNextItem = Math.abs(elevator.queue[elevator.queue.length - 1].destination - destination);
-		timeUntilArrival += distanceToNextItem * timeToSwitchFloor + waitingTime;
+		timeUntilArrival += distanceToNextItem * settings.timeToSwitchFloor + settings.waitingTime;
 
 		return timeUntilArrival;
 	}
@@ -114,15 +106,15 @@ function Elevators(props) {
 	}
 
 	function getElevatorButton(rowIndex) {
-		const elevatorToCall = getFirstElevatorToArrive(rowIndex);
+		const closestElevator = getClosestElevator(rowIndex);
 		return (
 			<ElevatorButton
 				onClick={() =>
 					dispatchUpdateElevators({
 						type: "ADD_ITEM_TO_QUEUE",
 						payload: {
-							index: elevatorToCall.elevatorIndex,
-							newItem: { destination: rowIndex, timeUntilArrival: elevatorToCall.timeUntilArrival },
+							index: closestElevator.elevator,
+							newItem: { destination: rowIndex, timeUntilArrival: closestElevator.timeUntilArrival },
 						},
 					})
 				}
@@ -146,7 +138,12 @@ function Elevators(props) {
 	return (
 		<>
 			<h1 className={classes.elevatorExercise}>Elevator Exercise</h1>
-			<div className={classes.grid} style={{ gridTemplateColumns, gridTemplateRows }}>
+			<div
+				className={classes.grid}
+				style={{
+					gridTemplateColumns: `repeat(${+settings.elevators + 2}, 1fr)`,
+					gridTemplateRows: `repeat(${+settings.floors}, 1fr)`,
+				}}>
 				{Array.from({ length: settings.floors }).map((_, rowIndex) =>
 					getGridRow(settings.floors - rowIndex - 1)
 				)}

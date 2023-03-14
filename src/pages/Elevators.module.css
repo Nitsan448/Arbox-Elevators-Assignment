@@ -22,6 +22,7 @@
 .cell {
 	display: flex;
 	height: 8vh;
+	min-width: 8vh;
 	justify-content: center;
 	align-items: center;
 	background-color: white;

@@ -5,6 +5,8 @@ export const settingsSlice = createSlice({
 	initialState: {
 		elevators: 5,
 		floors: 10,
+		timeToSwitchFloor: 1,
+		waitingTime: 2,
 	},
 	reducers: {
 		setElevatorsAndFloors(state, action) {

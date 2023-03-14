@@ -1,12 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import classes from "./Elevator.module.css";
 import elevatorImage from "../../images/icons8-elevator.svg";
+import { useSelector } from "react-redux";
 
 function Elevator(props) {
+	const settings = useSelector((state) => state.settings);
 	const { index, floor, isWaiting, queue } = props.elevatorState;
 	const updateElevatorState = useRef(props.updateElevatorState);
-	const hasMoved = useRef(false);
+
 	const destination = queue.length > 0 ? queue[0].destination : floor;
+	const hasMoved = useRef(false);
 
 	if (queue.length > 0) {
 		hasMoved.current = true;
@@ -25,9 +28,6 @@ function Elevator(props) {
 	//To account for the grid border gap
 	const translationPixels = newFloor * -2;
 
-	const timeToSwitchFloor = 1000;
-	const waitingTime = 2000;
-
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			updateElevatorState.current({
@@ -40,11 +40,11 @@ function Elevator(props) {
 					queue: queue,
 				},
 			});
-		}, timeToSwitchFloor);
+		}, settings.timeToSwitchFloor * 1000);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [hasArrived, updateElevatorState, index, newFloor, queue]);
+	}, [hasArrived, index, newFloor, queue, settings.timeToSwitchFloor]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -64,17 +64,17 @@ function Elevator(props) {
 					},
 				});
 			}
-		}, waitingTime);
+		}, settings.waitingTime * 1000);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [hasArrived, waitingTime, updateElevatorState, index, floor, isWaiting, queue]);
+	}, [hasArrived, index, floor, isWaiting, queue, settings.waitingTime]);
 
 	return (
 		<img
 			style={{
 				transform: `translateY(calc(${translationPercent}% + ${translationPixels}px))`,
-				transitionDuration: `${timeToSwitchFloor}ms`,
+				transitionDuration: `${settings.timeToSwitchFloor}s`,
 			}}
 			className={classes.elevator}
 			src={elevatorImage}
