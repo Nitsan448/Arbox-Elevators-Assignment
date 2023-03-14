@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import classes from "./Elevator.module.css";
 import elevatorImage from "../../images/icons8-elevator.svg";
 
 function Elevator(props) {
-	const { index, floor, destination, isWaiting } = props.elevatorState;
+	const { index, floor, isWaiting, queue } = props.elevatorState;
 	const updateElevatorState = useRef(props.updateElevatorState);
+	const destination = queue.length > 0 ? queue[0].destination : floor;
+
 	const hasMoved = destination !== -1;
 
 	let newFloor = floor;
@@ -13,6 +15,8 @@ function Elevator(props) {
 	} else if (destination < floor && hasMoved) {
 		newFloor--;
 	}
+
+	const reachedDestination = destination === newFloor && hasMoved && queue.length > 0;
 
 	const translationPercent = newFloor * -200;
 	//To account for the grid border gap
@@ -23,28 +27,31 @@ function Elevator(props) {
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			const reachedDestination = destination === newFloor && hasMoved;
 			updateElevatorState.current({
-				payload: { index: index, floor: newFloor, destination, isWaiting: reachedDestination },
+				payload: { index: index, floor: newFloor, isWaiting: reachedDestination, queue: queue },
 			});
 		}, timeToSwitchFloor);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [destination, timeToSwitchFloor, updateElevatorState, index, newFloor, hasMoved]);
+	}, [reachedDestination, updateElevatorState, index, newFloor, hasMoved, queue]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			if (isWaiting) {
+				const newQueue = [...queue];
+				if (reachedDestination) {
+					newQueue.shift();
+				}
 				updateElevatorState.current({
-					payload: { index, floor, destination, isWaiting: false },
+					payload: { index: index, floor: floor, isWaiting: false, queue: newQueue },
 				});
 			}
 		}, waitingTime);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [waitingTime, updateElevatorState, index, floor, destination, isWaiting]);
+	}, [reachedDestination, waitingTime, updateElevatorState, index, floor, isWaiting, queue]);
 
 	return (
 		<img

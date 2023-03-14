@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from "react";
+import React, { useReducer } from "react";
 import classes from "./Elevators.module.css";
 import { useSelector } from "react-redux";
 import ElevatorButton from "../components/UI/ElevatorButton";
@@ -11,8 +11,8 @@ function elevatorStateReducer(state, action) {
 			? {
 					index: action.payload.index,
 					floor: action.payload.floor,
-					destination: action.payload.destination,
 					isWaiting: action.payload.isWaiting,
+					queue: action.payload.queue,
 			  }
 			: elevator
 	);
@@ -28,8 +28,12 @@ function Elevators(props) {
 		Array.from({ length: settings.elevators }).map((_, index) => ({
 			index,
 			floor: 0,
-			destination: -1,
 			isWaiting: false,
+			queue: [
+				{ destination: 4, timeToArrive: 12 },
+				{ destination: 6, timeToArrive: 12 },
+				{ destination: 0, timeToArrive: 12 },
+			],
 		}))
 	);
 
