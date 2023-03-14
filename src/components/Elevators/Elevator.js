@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import classes from "./Elevator.module.css";
-import elevatorImage from "../../images/icons8-elevator.svg";
+import blackElevatorImage from "../../images/elevator-black.svg";
+import redElevatorImage from "../../images/elevator-red.svg";
+import greenElevatorImage from "../../images/elevator-green.svg";
 import { useSelector } from "react-redux";
 
 function Elevator(props) {
@@ -68,6 +70,16 @@ function Elevator(props) {
 		};
 	}, [arrivedInDestination, hasArrived, index, floor, queue, settings.waitingTime]);
 
+	function getElevatorImage() {
+		if (hasArrived) {
+			return greenElevatorImage;
+		} else if (destination !== floor) {
+			return redElevatorImage;
+		} else {
+			return blackElevatorImage;
+		}
+	}
+
 	return (
 		<img
 			style={{
@@ -75,7 +87,7 @@ function Elevator(props) {
 				transitionDuration: `${settings.timeToSwitchFloor}s`,
 			}}
 			className={classes.elevator}
-			src={elevatorImage}
+			src={getElevatorImage()}
 			alt="elevator"
 		/>
 	);
