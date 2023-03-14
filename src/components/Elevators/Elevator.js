@@ -31,6 +31,7 @@ function Elevator(props) {
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			updateElevatorState.current({
+				type: "UPDATE_ELEVATOR",
 				payload: {
 					index: index,
 					floor: newFloor,
@@ -53,6 +54,7 @@ function Elevator(props) {
 					newQueue.shift();
 				}
 				updateElevatorState.current({
+					type: "UPDATE_ELEVATOR",
 					payload: {
 						index: index,
 						floor: floor,

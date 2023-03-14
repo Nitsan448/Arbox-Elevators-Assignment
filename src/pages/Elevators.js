@@ -6,17 +6,32 @@ import { getNumberSuffix } from "../helpers/helpers";
 import Elevator from "../components/Elevators/Elevator";
 
 function elevatorStateReducer(state, action) {
-	return state.map((elevator) =>
-		elevator.index === action.payload.index
-			? {
-					index: action.payload.index,
-					floor: action.payload.floor,
-					isWaiting: action.payload.isWaiting,
-					hasArrived: action.payload.hasArrived,
-					queue: action.payload.queue,
-			  }
-			: elevator
-	);
+	switch (action.type) {
+		case "UPDATE_ELEVATOR":
+			return state.map((elevator) =>
+				elevator.index === action.payload.index
+					? {
+							index: action.payload.index,
+							floor: action.payload.floor,
+							isWaiting: action.payload.isWaiting,
+							hasArrived: action.payload.hasArrived,
+							queue: action.payload.queue,
+					  }
+					: elevator
+			);
+		case "ADD_ITEM_TO_QUEUE":
+			return state.map((elevator) =>
+				elevator.index === action.payload.index
+					? {
+							...elevator,
+							queue: [...elevator.queue, action.payload.newItem],
+					  }
+					: elevator
+			);
+
+		default:
+			break;
+	}
 }
 
 function Elevators(props) {
@@ -31,11 +46,7 @@ function Elevators(props) {
 			floor: 0,
 			isWaiting: false,
 			hasArrived: false,
-			queue: [
-				{ destination: 2, timeToArrive: 12 },
-				{ destination: 4, timeToArrive: 12 },
-				{ destination: 3, timeToArrive: 12 },
-			],
+			queue: [],
 		}))
 	);
 
@@ -55,7 +66,7 @@ function Elevators(props) {
 	}
 
 	function isElevatorOccupied(elevator) {
-		const elevatorIsMoving = elevator.floor !== elevator.destination && elevator.destination !== -1;
+		const elevatorIsMoving = elevator.queue.length > 0 && elevator.queue[0].floor !== elevator.queue[0].destination;
 		return elevatorIsMoving || elevator.isWaiting;
 	}
 
@@ -86,10 +97,10 @@ function Elevators(props) {
 			<ElevatorButton
 				onClick={() =>
 					dispatchUpdateElevators({
+						type: "ADD_ITEM_TO_QUEUE",
 						payload: {
-							index: elevator.index,
-							floor: elevator.floor,
-							isWaiting: elevator.isWaiting,
+							index: 0,
+							newItem: { destination: rowIndex, timeUntilArrival: 10 },
 						},
 					})
 				}
