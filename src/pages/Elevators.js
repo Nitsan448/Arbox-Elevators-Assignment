@@ -50,28 +50,49 @@ function Elevators(props) {
 		}))
 	);
 
-	const unoccupiedElevators = elevators.filter((_, elevatorIndex) => !isElevatorOccupied(elevators[elevatorIndex]));
+	// TODO: change function name
+	function getFirstElevatorToArrive(destination) {
+		let firstElevatorToArrive = { elevatorIndex: 0, timeUntilArrival: 1000 };
 
-	function getClosestUnoccupiedElevator(destination) {
-		let closestElevator = unoccupiedElevators[0];
-
-		for (let index = 1; index < unoccupiedElevators.length; index++) {
-			const currentClosestDistance = Math.abs(closestElevator.floor - destination);
-			const currentElevatorDistance = Math.abs(unoccupiedElevators[index].floor - destination);
-			if (currentClosestDistance > currentElevatorDistance) {
-				closestElevator = unoccupiedElevators[index];
+		//TODO: Calculate the time until the elevator arrives, return the one that will arrive first and it's time,
+		for (let elevatorIndex = 0; elevatorIndex < elevators.length; elevatorIndex++) {
+			const timeUntilArrival = getTimeUntilArrival(elevatorIndex, destination);
+			if (timeUntilArrival < firstElevatorToArrive.timeUntilArrival) {
+				firstElevatorToArrive = { elevatorIndex, timeUntilArrival };
 			}
 		}
-		return closestElevator;
+
+		return firstElevatorToArrive;
 	}
 
-	function isElevatorOccupied(elevator) {
-		const elevatorIsMoving = elevator.queue.length > 0 && elevator.queue[0].floor !== elevator.queue[0].destination;
-		return elevatorIsMoving || elevator.isWaiting;
+	function getTimeUntilArrival(elevatorIndex, destination) {
+		const elevator = elevators[elevatorIndex];
+		const timeToSwitchFloor = 1;
+		const waitingTime = 2;
+
+		if (elevator.queue.length === 0) {
+			let distanceToNextItem = Math.abs(elevator.floor - destination);
+			let timeUntilArrival = distanceToNextItem * timeToSwitchFloor + waitingTime;
+			return timeUntilArrival;
+		}
+
+		let distanceToNextItem = Math.abs(elevator.floor - elevator.queue[0].destination);
+		let timeUntilArrival = distanceToNextItem * timeToSwitchFloor + waitingTime;
+
+		for (let index = 1; index < elevator.queue.length; index++) {
+			distanceToNextItem = Math.abs(elevator.queue[index - 1].destination - elevator.queue[index].destination);
+
+			const timeUntilArrivalToItem = distanceToNextItem * timeToSwitchFloor;
+			timeUntilArrival += timeUntilArrivalToItem + waitingTime;
+		}
+
+		distanceToNextItem = Math.abs(elevator.queue[elevator.queue.length - 1].destination - destination);
+		timeUntilArrival += distanceToNextItem * timeToSwitchFloor + waitingTime;
+
+		return timeUntilArrival;
 	}
 
 	function getGridRow(rowIndex) {
-		const elevator = getClosestUnoccupiedElevator(rowIndex);
 		return (
 			<React.Fragment key={rowIndex}>
 				<p className={classes.rowNumber}>{getFloorText(rowIndex)}</p>
@@ -82,7 +103,7 @@ function Elevators(props) {
 						)}
 					</div>
 				))}
-				{getElevatorButton(elevator, rowIndex)}
+				{getElevatorButton(rowIndex)}
 			</React.Fragment>
 		);
 	}
@@ -92,15 +113,16 @@ function Elevators(props) {
 		return floorText;
 	}
 
-	function getElevatorButton(elevator, rowIndex) {
+	function getElevatorButton(rowIndex) {
+		const elevatorToCall = getFirstElevatorToArrive(rowIndex);
 		return (
 			<ElevatorButton
 				onClick={() =>
 					dispatchUpdateElevators({
 						type: "ADD_ITEM_TO_QUEUE",
 						payload: {
-							index: 0,
-							newItem: { destination: rowIndex, timeUntilArrival: 10 },
+							index: elevatorToCall.elevatorIndex,
+							newItem: { destination: rowIndex, timeUntilArrival: elevatorToCall.timeUntilArrival },
 						},
 					})
 				}

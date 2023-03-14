@@ -2,24 +2,24 @@ import React, { useEffect, useRef } from "react";
 import classes from "./Elevator.module.css";
 import elevatorImage from "../../images/icons8-elevator.svg";
 
-let hasMoved = false;
 function Elevator(props) {
 	const { index, floor, isWaiting, queue } = props.elevatorState;
 	const updateElevatorState = useRef(props.updateElevatorState);
+	const hasMoved = useRef(false);
 	const destination = queue.length > 0 ? queue[0].destination : floor;
 
 	if (queue.length > 0) {
-		hasMoved = true;
+		hasMoved.current = true;
 	}
 
 	let newFloor = floor;
 	if (destination > floor) {
 		newFloor++;
-	} else if (destination < floor && hasMoved) {
+	} else if (destination < floor && hasMoved.current) {
 		newFloor--;
 	}
 
-	const hasArrived = destination === newFloor && hasMoved;
+	const hasArrived = destination === newFloor && hasMoved.current;
 
 	const translationPercent = newFloor * -200;
 	//To account for the grid border gap
