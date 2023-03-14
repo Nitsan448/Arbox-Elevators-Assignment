@@ -30,7 +30,7 @@ function Elevators(props) {
 			index,
 			floor: 0,
 			isWaiting: false,
-			hasArrived: true,
+			hasArrived: false,
 			queue: [
 				{ destination: 2, timeToArrive: 12 },
 				{ destination: 4, timeToArrive: 12 },

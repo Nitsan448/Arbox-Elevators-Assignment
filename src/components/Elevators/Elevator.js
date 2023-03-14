@@ -2,12 +2,15 @@ import React, { useEffect, useRef } from "react";
 import classes from "./Elevator.module.css";
 import elevatorImage from "../../images/icons8-elevator.svg";
 
+let hasMoved = false;
 function Elevator(props) {
 	const { index, floor, isWaiting, queue } = props.elevatorState;
 	const updateElevatorState = useRef(props.updateElevatorState);
 	const destination = queue.length > 0 ? queue[0].destination : floor;
 
-	const hasMoved = destination !== -1;
+	if (queue.length > 0) {
+		hasMoved = true;
+	}
 
 	let newFloor = floor;
 	if (destination > floor) {
@@ -40,7 +43,7 @@ function Elevator(props) {
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [hasArrived, updateElevatorState, index, newFloor, hasMoved, queue]);
+	}, [hasArrived, updateElevatorState, index, newFloor, queue]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
