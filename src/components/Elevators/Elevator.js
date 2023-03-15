@@ -19,16 +19,15 @@ function Elevator(props) {
 		newFloor--;
 	}
 
-	const arrivedInDestination = destination === newFloor && queue.length > 0;
+	const arrivingInDestination = destination === newFloor && queue.length > 0;
 
 	const translationPercent = newFloor * -200;
-
 	//To account for the grid border gap
 	const translationPixels = newFloor * -2;
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			if (arrivedInDestination) {
+			if (arrivingInDestination) {
 				//TODO: Remember to uncomment!!!
 				// new Audio(elevatorArrivedSound).play();
 			}
@@ -43,40 +42,41 @@ function Elevator(props) {
 				type: "UPDATE_HAS_ARRIVED_STATE",
 				payload: {
 					index: index,
-					hasArrived: arrivedInDestination,
+					hasArrived: arrivingInDestination,
 				},
 			});
 		}, settings.timeToSwitchFloor * 1000);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [arrivedInDestination, newFloor, index, settings.timeToSwitchFloor, updateElevatorState]);
+	}, [arrivingInDestination, newFloor, index, settings.timeToSwitchFloor, updateElevatorState]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			if (arrivedInDestination) {
-				const newQueue = [...queue];
-				newQueue.shift();
+			if (hasArrived) {
+				if (arrivingInDestination) {
+					queue.shift();
+					updateElevatorState({
+						type: "UPDATE_QUEUE",
+						payload: {
+							index: index,
+							queue: queue,
+						},
+					});
+				}
 				updateElevatorState({
-					type: "UPDATE_QUEUE",
+					type: "UPDATE_HAS_ARRIVED_STATE",
 					payload: {
 						index: index,
-						queue: newQueue,
+						hasArrived: false,
 					},
 				});
 			}
-			updateElevatorState({
-				type: "UPDATE_HAS_ARRIVED_STATE",
-				payload: {
-					index: index,
-					hasArrived: false,
-				},
-			});
 		}, settings.waitingTime * 1000);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [arrivedInDestination, index, queue, settings.waitingTime, updateElevatorState]);
+	}, [arrivingInDestination, index, queue, hasArrived, settings.waitingTime, updateElevatorState]);
 
 	function getElevatorImage() {
 		if (hasArrived) {

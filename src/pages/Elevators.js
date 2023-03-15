@@ -54,13 +54,12 @@ function Elevators(props) {
 	);
 
 	function getClosestElevator(destination) {
-		//TODO: rename
-		let closestElevator = { elevatorIndex: elevators[0], timeUntilArrival: 10000 };
+		let closestElevator = { elevatorIndex: elevators[0], totalTimeUntilArrival: Number.MAX_VALUE };
 
 		elevators.forEach((elevator) => {
-			const timeUntilArrival = getTimeUntilArrival(elevator, destination);
-			if (timeUntilArrival < closestElevator.timeUntilArrival) {
-				closestElevator = { elevator, timeUntilArrival };
+			const totalTimeUntilArrival = getTimeUntilArrival(elevator, destination);
+			if (totalTimeUntilArrival < closestElevator.totalTimeUntilArrival) {
+				closestElevator = { elevator, totalTimeUntilArrival };
 			}
 		});
 
@@ -69,25 +68,29 @@ function Elevators(props) {
 
 	function getTimeUntilArrival(elevator, destination) {
 		if (elevator.queue.length === 0) {
-			const distanceToDestination = Math.abs(elevator.floor - destination);
-			const timeUntilArrival = distanceToDestination * settings.timeToSwitchFloor;
-			return timeUntilArrival;
+			const distanceToDestination = getDistance(elevator.floor, destination);
+			const totalTimeUntilArrival = distanceToDestination * settings.timeToSwitchFloor;
+			return totalTimeUntilArrival;
 		}
 
-		let distanceToNextItem = Math.abs(elevator.floor - elevator.queue[0].destination);
-		let timeUntilArrival = distanceToNextItem * settings.timeToSwitchFloor;
+		let distanceToNextItem = getDistance(elevator.floor, elevator.queue[0].destination);
+		let totalTimeUntilArrival = distanceToNextItem * settings.timeToSwitchFloor;
 
 		for (let index = 1; index < elevator.queue.length; index++) {
-			distanceToNextItem = Math.abs(elevator.queue[index - 1].destination - elevator.queue[index].destination);
+			distanceToNextItem = getDistance(elevator.queue[index - 1].destination, elevator.queue[index].destination);
 
 			const timeUntilArrivalToNextItem = distanceToNextItem * settings.timeToSwitchFloor;
-			timeUntilArrival += timeUntilArrivalToNextItem + settings.waitingTime;
+			totalTimeUntilArrival += timeUntilArrivalToNextItem + settings.waitingTime;
 		}
 
-		distanceToNextItem = Math.abs(elevator.queue[elevator.queue.length - 1].destination - destination);
-		timeUntilArrival += distanceToNextItem * settings.timeToSwitchFloor + settings.waitingTime;
+		distanceToNextItem = getDistance(elevator.queue[elevator.queue.length - 1].destination, destination);
+		totalTimeUntilArrival += distanceToNextItem * settings.timeToSwitchFloor + settings.waitingTime;
 
-		return timeUntilArrival;
+		return totalTimeUntilArrival;
+	}
+
+	function getDistance(floor, destination) {
+		return Math.abs(floor - destination);
 	}
 
 	function getGridRow(floor) {
@@ -96,11 +99,13 @@ function Elevators(props) {
 				<p className={classes.rowNumber}>{getFloorText(floor)}</p>
 				{elevators.map((elevator, columnIndex) => (
 					<div key={columnIndex} className={classes.cell}>
-						{0 === floor && (
+						{floor === 0 && (
 							<Elevator updateElevatorState={dispatchUpdateElevators} elevatorState={elevator} />
 						)}
-						{elevator.floor !== floor && isDestinationInQueue(elevator, floor) && (
-							<p>{getTimeUntilArrivalFromQueue(elevator, floor)} sec.</p>
+						{elevator.floor !== floor && getQueueItem(elevator, floor) && (
+							<p className={classes.timeUntilArrival}>
+								{getTimeUntilArrivalText(getQueueItem(elevator, floor).totalTimeUntilArrival)}
+							</p>
 						)}
 					</div>
 				))}
@@ -109,17 +114,27 @@ function Elevators(props) {
 		);
 	}
 
-	function isDestinationInQueue(elevator, destination) {
-		return elevator.queue.some((item) => item.destination === destination);
-	}
-
-	function getTimeUntilArrivalFromQueue(elevator, destination) {
-		return elevator.queue.find((item) => item.destination === destination).timeUntilArrival;
-	}
-
 	function getFloorText(floor) {
 		const floorText = floor === 0 ? "Ground Floor" : `${floor}${getNumberSuffix(floor)}`;
 		return floorText;
+	}
+
+	function getQueueItem(elevator, destination) {
+		return elevator.queue.find((item) => item.destination === destination);
+	}
+
+	function getTimeUntilArrivalText(timeInSeconds) {
+		const minutes = Math.floor(timeInSeconds / 60);
+		const seconds = timeInSeconds % 60;
+
+		let minutesString = minutes === 0 ? "" : `${minutes} min. `;
+		let secondsString = seconds.toString() + " sec.";
+
+		if (minutes === 0) {
+			minutesString = "";
+		}
+
+		return `${minutesString}${secondsString}`;
 	}
 
 	function getElevatorButton(floor) {
@@ -128,7 +143,7 @@ function Elevators(props) {
 
 		const newQueue = [
 			...closestElevator.elevator.queue,
-			{ destination: floor, timeUntilArrival: closestElevator.timeUntilArrival },
+			{ destination: floor, totalTimeUntilArrival: closestElevator.totalTimeUntilArrival },
 		];
 		return (
 			<ElevatorButton
@@ -154,7 +169,7 @@ function Elevators(props) {
 
 			if (elevatorInFloor && elevators[i].hasArrived) {
 				return { text: "arrived", disabled: true };
-			} else if (isDestinationInQueue(elevators[i], floor)) {
+			} else if (getQueueItem(elevators[i], floor)) {
 				return { text: "waiting", disabled: true };
 			}
 		}

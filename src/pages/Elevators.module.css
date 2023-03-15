@@ -19,7 +19,13 @@
 	margin: auto 1em auto 0em;
 }
 
+.timeUntilArrival {
+	position: absolute;
+	text-align: center;
+}
+
 .cell {
+	position: relative;
 	display: flex;
 	height: 8vh;
 	min-width: 8vh;
