@@ -4,7 +4,7 @@
 	border-radius: var(--BORDER-RADIUS);
 	margin: auto 0 auto 1em;
 	border: none;
-	/* box-shadow: ; */
+	box-shadow: 0.5px 0.5px var(--BLACK);
 }
 
 .call {

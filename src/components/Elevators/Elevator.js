@@ -28,8 +28,7 @@ function Elevator(props) {
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			if (arrivingInDestination) {
-				//TODO: Remember to uncomment!!!
-				// new Audio(elevatorArrivedSound).play();
+				new Audio(elevatorArrivedSound).play();
 			}
 			updateElevatorState({
 				type: "UPDATE_FLOOR",
@@ -45,11 +44,11 @@ function Elevator(props) {
 					hasArrived: arrivingInDestination,
 				},
 			});
-		}, settings.timeToSwitchFloor * 1000);
+		}, settings.floorTransitionTime * 1000);
 		return () => {
 			clearTimeout(timer);
 		};
-	}, [arrivingInDestination, newFloor, index, settings.timeToSwitchFloor, updateElevatorState]);
+	}, [arrivingInDestination, newFloor, index, settings.floorTransitionTime, updateElevatorState]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -92,7 +91,7 @@ function Elevator(props) {
 		<img
 			style={{
 				transform: `translateY(calc(${translationPercent}% + ${translationPixels}px))`,
-				transitionDuration: `${settings.timeToSwitchFloor}s`,
+				transitionDuration: `${settings.floorTransitionTime}s`,
 			}}
 			className={classes.elevator}
 			src={getElevatorImage()}

@@ -2,7 +2,7 @@ import React from "react";
 import classes from "./Settings.module.css";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { setElevatorsAndFloors } from "../store/settingsSlice";
+import { setSettings } from "../store/settingsSlice";
 import { useNavigate } from "react-router-dom";
 
 function Settings(props) {
@@ -17,14 +17,16 @@ function Settings(props) {
 		defaultValues: {
 			floors: 10,
 			elevators: 5,
+			floorTransitionTime: 1,
 		},
 	});
 
 	function saveSettingsAndGoToMainPage(data) {
 		dispatch(
-			setElevatorsAndFloors({
+			setSettings({
 				floors: data.floors,
 				elevators: data.elevators,
+				floorTransitionTime: data.floorTransitionTime,
 			})
 		);
 
@@ -48,6 +50,16 @@ function Settings(props) {
 				{...register("elevators", {
 					required: "Please enter a valid number of elevators",
 					min: { value: 1, message: "There must be at least one elevator in the building" },
+				})}
+			/>
+			{errors.elevators && <p className={"invalidParagraph"}>{errors.elevators.message}</p>}
+			<label htmlFor="floorTransitionTime">Floor transition time (in seconds):</label>
+			<input
+				type="number"
+				step={0.1}
+				{...register("floorTransitionTime", {
+					required: "Please enter the floor transition time",
+					min: { value: 0.1, message: "There must be at least one elevator in the building" },
 				})}
 			/>
 			{errors.elevators && <p className={"invalidParagraph"}>{errors.elevators.message}</p>}

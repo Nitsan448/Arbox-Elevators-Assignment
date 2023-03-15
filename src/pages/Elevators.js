@@ -69,22 +69,22 @@ function Elevators(props) {
 	function getTimeUntilArrival(elevator, destination) {
 		if (elevator.queue.length === 0) {
 			const distanceToDestination = getDistance(elevator.floor, destination);
-			const totalTimeUntilArrival = distanceToDestination * settings.timeToSwitchFloor;
+			const totalTimeUntilArrival = distanceToDestination * settings.floorTransitionTime;
 			return totalTimeUntilArrival;
 		}
 
 		let distanceToNextItem = getDistance(elevator.floor, elevator.queue[0].destination);
-		let totalTimeUntilArrival = distanceToNextItem * settings.timeToSwitchFloor;
+		let totalTimeUntilArrival = distanceToNextItem * settings.floorTransitionTime;
 
 		for (let index = 1; index < elevator.queue.length; index++) {
 			distanceToNextItem = getDistance(elevator.queue[index - 1].destination, elevator.queue[index].destination);
 
-			const timeUntilArrivalToNextItem = distanceToNextItem * settings.timeToSwitchFloor;
+			const timeUntilArrivalToNextItem = distanceToNextItem * settings.floorTransitionTime;
 			totalTimeUntilArrival += timeUntilArrivalToNextItem + settings.waitingTime;
 		}
 
 		distanceToNextItem = getDistance(elevator.queue[elevator.queue.length - 1].destination, destination);
-		totalTimeUntilArrival += distanceToNextItem * settings.timeToSwitchFloor + settings.waitingTime;
+		totalTimeUntilArrival += distanceToNextItem * settings.floorTransitionTime + settings.waitingTime;
 
 		return totalTimeUntilArrival;
 	}
@@ -125,7 +125,7 @@ function Elevators(props) {
 
 	function getTimeUntilArrivalText(timeInSeconds) {
 		const minutes = Math.floor(timeInSeconds / 60);
-		const seconds = timeInSeconds % 60;
+		const seconds = Math.round((timeInSeconds % 60) * 10) / 10;
 
 		let minutesString = minutes === 0 ? "" : `${minutes} min. `;
 		let secondsString = seconds.toString() + " sec.";
