@@ -3,6 +3,7 @@ import classes from "./Elevator.module.css";
 import blackElevatorImage from "../../images/elevator-black.svg";
 import redElevatorImage from "../../images/elevator-red.svg";
 import greenElevatorImage from "../../images/elevator-green.svg";
+import elevatorArrivedSound from "../../assets/elevatorArrived.wav";
 import { useSelector } from "react-redux";
 
 function Elevator(props) {
@@ -11,20 +12,14 @@ function Elevator(props) {
 	const updateElevatorState = useRef(props.updateElevatorState);
 
 	const destination = queue.length > 0 ? queue[0].destination : floor;
-	const hasMoved = useRef(false);
-
-	if (queue.length > 0) {
-		hasMoved.current = true;
-	}
-
 	let newFloor = floor;
 	if (destination > floor) {
 		newFloor++;
-	} else if (destination < floor && hasMoved.current) {
+	} else if (destination < floor) {
 		newFloor--;
 	}
 
-	const arrivedInDestination = destination === newFloor && hasMoved.current && queue.length > 0;
+	const arrivedInDestination = destination === newFloor && queue.length > 0;
 
 	const translationPercent = newFloor * -200;
 	//To account for the grid border gap
@@ -32,6 +27,9 @@ function Elevator(props) {
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
+			if (arrivedInDestination) {
+				new Audio(elevatorArrivedSound).play();
+			}
 			updateElevatorState.current({
 				type: "UPDATE_ELEVATOR",
 				payload: {
