@@ -7,23 +7,30 @@ import Elevator from "../components/Elevators/Elevator";
 
 function elevatorStateReducer(state, action) {
 	switch (action.type) {
-		case "UPDATE_ELEVATOR":
-			return state.map((elevator) =>
-				elevator.index === action.payload.index
-					? {
-							index: action.payload.index,
-							floor: action.payload.floor,
-							hasArrived: action.payload.hasArrived,
-							queue: action.payload.queue,
-					  }
-					: elevator
-			);
-		case "ADD_ITEM_TO_QUEUE":
+		case "UPDATE_FLOOR":
 			return state.map((elevator) =>
 				elevator.index === action.payload.index
 					? {
 							...elevator,
-							queue: [...elevator.queue, action.payload.newItem],
+							floor: action.payload.floor,
+					  }
+					: elevator
+			);
+		case "UPDATE_HAS_ARRIVED_STATE":
+			return state.map((elevator) =>
+				elevator.index === action.payload.index
+					? {
+							...elevator,
+							hasArrived: action.payload.hasArrived,
+					  }
+					: elevator
+			);
+		case "UPDATE_QUEUE":
+			return state.map((elevator) =>
+				elevator.index === action.payload.index
+					? {
+							...elevator,
+							queue: action.payload.queue,
 					  }
 					: elevator
 			);
@@ -47,7 +54,8 @@ function Elevators(props) {
 	);
 
 	function getClosestElevator(destination) {
-		let closestElevator = { elevatorIndex: elevators[0], timeUntilArrival: 1000 };
+		//TODO: rename
+		let closestElevator = { elevatorIndex: elevators[0], timeUntilArrival: 10000 };
 
 		elevators.forEach((elevator) => {
 			const timeUntilArrival = getTimeUntilArrival(elevator, destination);
@@ -117,14 +125,19 @@ function Elevators(props) {
 	function getElevatorButton(floor) {
 		const closestElevator = getClosestElevator(floor);
 		const buttonState = getElevatorButtonState(floor);
+
+		const newQueue = [
+			...closestElevator.elevator.queue,
+			{ destination: floor, timeUntilArrival: closestElevator.timeUntilArrival },
+		];
 		return (
 			<ElevatorButton
 				onClick={() =>
 					dispatchUpdateElevators({
-						type: "ADD_ITEM_TO_QUEUE",
+						type: "UPDATE_QUEUE",
 						payload: {
 							index: closestElevator.elevator.index,
-							newItem: { destination: floor, timeUntilArrival: closestElevator.timeUntilArrival },
+							queue: newQueue,
 						},
 					})
 				}
