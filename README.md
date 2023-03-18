@@ -1,10 +1,5 @@
 # Home assignment - elevators
 
-## Table of Contents
-
-- [How to run](#how-to-run)
-- [Code design](#code-design)
-
 ## How to run
 
 Clone the repository:
