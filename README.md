@@ -20,7 +20,7 @@ Start the web app:
 #### The main page of the app is the elevators.js file which is located in the src/pages folder.
 
 The project manages the state of each elevator using an array called 'elevators'.</br>
- This array contains information such as the elevator's index, current floor, state, and a queue for its next destinations.
+each element in this array represents an elevator and contains information such as the elevator's index, </br>current floor, state, and a queue for its next destinations.
 
 When a 'call' button is pressed, the elevator to be called is determined by checking which elevator will arrive first.</br>
 This is done by calculating the time it will take the elevator to move between each destination in its queue,</br>
