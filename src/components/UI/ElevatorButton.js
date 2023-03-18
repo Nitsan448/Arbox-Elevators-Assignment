@@ -15,6 +15,7 @@ function ElevatorButton(props) {
 			buttonClasses = `${classes.button} ${classes.call}`;
 			break;
 	}
+
 	return (
 		<button disabled={props.disabled} className={buttonClasses} onClick={props.onClick}>
 			{props.text}

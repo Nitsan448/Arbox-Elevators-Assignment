@@ -1,6 +1,6 @@
 :root {
 	/* FONTS */
-	--FF: sans-serif;
+	--FF: Arial, Helvetica, sans-serif;
 	--FS: clamp(0.8rem, 2.2vh, 1.5rem);
 
 	/* COLORS */
@@ -13,7 +13,4 @@
 	/* BORDERS */
 	--BORDER: 4px var(--GRAY) solid;
 	--BORDER-RADIUS: 5px;
-
-	/* MARGIN */
-	--MARGIN: clamp(1em, 2.5vh, 1.5em) 0;
 }

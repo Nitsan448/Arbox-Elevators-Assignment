@@ -59,10 +59,10 @@ function Settings(props) {
 				step={0.1}
 				{...register("floorTransitionTime", {
 					required: "Please enter the floor transition time",
-					min: { value: 0.1, message: "There must be at least one elevator in the building" },
+					min: { value: 0, message: "Elevators cannot have a negative speed" },
 				})}
 			/>
-			{errors.elevators && <p className={"invalidParagraph"}>{errors.elevators.message}</p>}
+			{errors.floorTransitionTime && <p className={"invalidParagraph"}>{errors.floorTransitionTime.message}</p>}
 			<button>Enter building</button>
 		</form>
 	);

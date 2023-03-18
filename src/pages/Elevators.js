@@ -53,57 +53,17 @@ function Elevators(props) {
 		}))
 	);
 
-	function getClosestElevator(destination) {
-		let closestElevator = { elevatorIndex: elevators[0], totalTimeUntilArrival: Number.MAX_VALUE };
-
-		elevators.forEach((elevator) => {
-			const totalTimeUntilArrival = getTimeUntilArrival(elevator, destination);
-			if (totalTimeUntilArrival < closestElevator.totalTimeUntilArrival) {
-				closestElevator = { elevator, totalTimeUntilArrival };
-			}
-		});
-
-		return closestElevator;
-	}
-
-	function getTimeUntilArrival(elevator, destination) {
-		if (elevator.queue.length === 0) {
-			const distanceToDestination = getDistance(elevator.floor, destination);
-			const totalTimeUntilArrival = distanceToDestination * settings.floorTransitionTime;
-			return totalTimeUntilArrival;
-		}
-
-		let distanceToNextItem = getDistance(elevator.floor, elevator.queue[0].destination);
-		let totalTimeUntilArrival = distanceToNextItem * settings.floorTransitionTime;
-
-		for (let index = 1; index < elevator.queue.length; index++) {
-			distanceToNextItem = getDistance(elevator.queue[index - 1].destination, elevator.queue[index].destination);
-
-			const timeUntilArrivalToNextItem = distanceToNextItem * settings.floorTransitionTime;
-			totalTimeUntilArrival += timeUntilArrivalToNextItem + settings.waitingTime;
-		}
-
-		distanceToNextItem = getDistance(elevator.queue[elevator.queue.length - 1].destination, destination);
-		totalTimeUntilArrival += distanceToNextItem * settings.floorTransitionTime + settings.waitingTime;
-
-		return totalTimeUntilArrival;
-	}
-
-	function getDistance(floor, destination) {
-		return Math.abs(floor - destination);
-	}
-
 	function getGridRow(floor) {
 		return (
 			<React.Fragment key={floor}>
-				<p className={classes.rowNumber}>{getFloorText(floor)}</p>
+				<p className={classes.grid__rowNumber}>{getFloorText(floor)}</p>
 				{elevators.map((elevator, columnIndex) => (
-					<div key={columnIndex} className={classes.cell}>
+					<div key={columnIndex} className={classes.grid__cell}>
 						{floor === 0 && (
 							<Elevator updateElevatorState={dispatchUpdateElevators} elevatorState={elevator} />
 						)}
 						{elevator.floor !== floor && getQueueItem(elevator, floor) && (
-							<p className={classes.timeUntilArrival}>
+							<p className={classes.grid__timeUntilArrival}>
 								{getTimeUntilArrivalText(getQueueItem(elevator, floor).totalTimeUntilArrival)}
 							</p>
 						)}
@@ -162,6 +122,46 @@ function Elevators(props) {
 		);
 	}
 
+	function getClosestElevator(destination) {
+		let closestElevator = { elevatorIndex: elevators[0], totalTimeUntilArrival: Number.MAX_VALUE };
+
+		elevators.forEach((elevator) => {
+			const totalTimeUntilArrival = getTimeUntilArrival(elevator, destination);
+			if (totalTimeUntilArrival < closestElevator.totalTimeUntilArrival) {
+				closestElevator = { elevator, totalTimeUntilArrival };
+			}
+		});
+
+		return closestElevator;
+	}
+
+	function getTimeUntilArrival(elevator, destination) {
+		if (elevator.queue.length === 0) {
+			const distanceToDestination = getDistance(elevator.floor, destination);
+			const totalTimeUntilArrival = distanceToDestination * settings.floorTransitionTime;
+			return totalTimeUntilArrival;
+		}
+
+		let distanceToNextItem = getDistance(elevator.floor, elevator.queue[0].destination);
+		let totalTimeUntilArrival = distanceToNextItem * settings.floorTransitionTime;
+
+		for (let index = 1; index < elevator.queue.length; index++) {
+			distanceToNextItem = getDistance(elevator.queue[index - 1].destination, elevator.queue[index].destination);
+
+			const timeUntilArrivalToNextItem = distanceToNextItem * settings.floorTransitionTime;
+			totalTimeUntilArrival += timeUntilArrivalToNextItem + settings.waitingTime;
+		}
+
+		distanceToNextItem = getDistance(elevator.queue[elevator.queue.length - 1].destination, destination);
+		totalTimeUntilArrival += distanceToNextItem * settings.floorTransitionTime + settings.waitingTime;
+
+		return totalTimeUntilArrival;
+	}
+
+	function getDistance(floor, destination) {
+		return Math.abs(floor - destination);
+	}
+
 	function getElevatorButtonState(floor) {
 		const elevatorButtonState = { text: "call", disabled: false };
 		for (let i = 0; i < elevators.length; i++) {
@@ -177,8 +177,8 @@ function Elevators(props) {
 	}
 
 	return (
-		<>
-			<h1 className={classes.elevatorExercise}>Elevator Exercise</h1>
+		<div>
+			<h1 className={classes.title}>Elevator Exercise</h1>
 			<div
 				className={classes.grid}
 				style={{
@@ -187,7 +187,7 @@ function Elevators(props) {
 				}}>
 				{Array.from({ length: settings.floors }).map((_, floor) => getGridRow(settings.floors - floor - 1))}
 			</div>
-		</>
+		</div>
 	);
 }
 

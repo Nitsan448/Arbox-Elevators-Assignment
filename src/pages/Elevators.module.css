@@ -1,36 +1,33 @@
-.elevatorExercise {
-	margin: 1em 0 1em 0;
+.title {
+	margin: 1em 0;
 	text-align: center;
 }
 
 .grid {
 	display: grid;
 	background-color: var(--GRAY);
-	border-radius: 5px;
-	border: 4px var(--GRAY) solid;
 	grid-gap: 2px;
 	width: 60%;
 	margin: auto;
 }
 
-.rowNumber {
+.grid__rowNumber {
 	text-align: right;
 	font-weight: bold;
 	margin: auto 1em auto 0em;
 }
 
-.timeUntilArrival {
+.grid__timeUntilArrival {
 	position: absolute;
 	text-align: center;
 }
 
-.cell {
-	position: relative;
+.grid__cell {
 	display: flex;
-	height: 8vh;
-	min-width: 8vh;
 	justify-content: center;
 	align-items: center;
+	height: 8vh;
+	min-width: 8vh;
 	background-color: white;
 	color: var(--BLACK);
 }
